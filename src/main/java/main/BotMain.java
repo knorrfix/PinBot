@@ -56,7 +56,7 @@ public class BotMain {
         // Disable compression (not recommended)
         builder.setCompression(Compression.NONE);
         // Set activity (like "playing Something")
-        builder.setActivity(Activity.playing("use me"));
+        builder.setActivity(Activity.playing("with needles"));
 
         MessageListener ml = new MessageListener();
         StapleReactionListener srl = new StapleReactionListener();

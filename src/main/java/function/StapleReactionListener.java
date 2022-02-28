@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
+import net.dv8tion.jda.internal.entities.SystemMessage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -42,19 +43,22 @@ public class StapleReactionListener extends ReactionEventListener{
     @Override
     public void onAddReaction(@NotNull MessageReactionAddEvent event) {
         String id = event.getMessageId();
-        TextChannel channel = Util.getTextChannel(event.getJDA(), id);
-        channel.pinMessageById(id).queue();
+        TextChannel channel = event.getTextChannel();
+        channel.retrieveMessageById(id).queue((Message m) -> {
+            if (m instanceof SystemMessage) return;
+            m.pin().queue();
+        });
     }
 
     @Override
     public void onRemoveReaction(@NotNull MessageReactionRemoveEvent event) {
         String id = event.getMessageId();
 
-        TextChannel channel = Util.getTextChannel(event.getJDA(), id);
+        TextChannel channel = event.getTextChannel();
         channel.retrieveMessageById(id).queue((Message m) -> {
-            if (m.getReactionByUnicode(emote()) == null) {
-                channel.unpinMessageById(id).queue();
-            }
+            if (m instanceof SystemMessage) return;
+            if (m.getReactionByUnicode(emote()) != null) return;
+            m.unpin().queue();
         });
     }
 }
